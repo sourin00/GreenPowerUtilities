@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import shutil
+import os
 
 # Emissions factors in kg CO2e per MWh (example values, adjust as needed)
 EMISSIONS_FACTORS = {
@@ -72,6 +74,20 @@ def plot_carbon(carbon_report):
     plt.savefig('carbon_emissions_plot.png')
     plt.show()
 
+def export_for_tableau():
+    export_dir = 'tableau_exports'
+    os.makedirs(export_dir, exist_ok=True)
+    files_to_export = [
+        'merged_data.csv',
+        'forecast_by_type.csv',
+        'anomalies.csv',
+        'carbon_report.csv'
+    ]
+    for fname in files_to_export:
+        if os.path.exists(fname):
+            shutil.copy(fname, os.path.join(export_dir, fname))
+    print(f"Exported latest CSVs to {export_dir}/ for Tableau.")
+
 def main():
     df = pd.read_csv('merged_data.csv')
     # Anomaly Detection
@@ -86,6 +102,7 @@ def main():
     # Visualization
     plot_anomalies(anomalies)
     plot_carbon(carbon_report)
+    export_for_tableau()
 
 if __name__ == "__main__":
     main()
