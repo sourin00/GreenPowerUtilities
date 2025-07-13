@@ -1,0 +1,10 @@
+pandas~=2.3.1
+requests~=2.32.4
+sqlalchemy~=2.0.41
+psycopg2-binary
+matplotlib~=3.10.3
+scikit-learn
+prophet~=1.1.7
+python-dotenv~=1.1.1
+numpy~=2.3.1
+plotly
