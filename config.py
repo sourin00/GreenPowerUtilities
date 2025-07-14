@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
-DB_URI = os.getenv("DB_URI", "postgresql://postgres:123qwe@localhost:5432/green_power")
+#DB_URI = os.getenv("DB_URI", "postgresql://postgres:123qwe@localhost:5432/green_power") # Local development
+DB_URI = os.getenv("DB_URI", "postgresql://postgres.pbbbnfsqfetucbvzixbu:123qwe@aws-0-ap-south-1.pooler.supabase.com:6543/postgres") # Production Supabase
 IEA_CSV = os.path.join("data", "input", "IEA_France_2023_2025.csv")
 COUNTRIES = ["France"]
 LOCATIONS = {
