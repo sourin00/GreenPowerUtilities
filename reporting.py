@@ -1,36 +1,50 @@
+"""
+Handles all analytics, anomaly detection, carbon tracking, and reporting logic.
+"""
 import pandas as pd
-import matplotlib.pyplot as plt
-from sqlalchemy import create_engine
-from config import DB_URI, COUNTRIES
+import numpy as np
+import os
+import shutil
+from config import EMISSIONS_FACTORS, MERGED_DATA_CSV, ANOMALIES_CSV, CARBON_REPORT_CSV, TABLEAU_EXPORT_DIR, FORECAST_BY_TYPE_CSV, PROCESSED_WEATHER_COLS
 
-def fetch_data(query):
-    engine = create_engine(DB_URI)
-    return pd.read_sql(query, engine)
+def detect_anomalies(df, window=12, threshold=3):
+    df = df.copy()
+    df['zscore'] = (df['value_gwh'] - df['value_gwh'].rolling(window).mean()) / df['value_gwh'].rolling(window).std()
+    df['anomaly'] = df['zscore'].abs() > threshold
+    return df[df['anomaly']]
 
-def monthly_summary(country):
-    query = f"""
-        SELECT month, SUM(value_gwh) as total_gen, SUM(household_consumption_gwh) as household_cons
-        FROM power_data
-        JOIN consumption_data USING (country, month)
-        WHERE country = '{country}'
-        GROUP BY month
-        ORDER BY month
-    """
-    return fetch_data(query)
+def calculate_carbon(df):
+    df = df.copy()
+    df['emissions_factor'] = df['production_type'].map(EMISSIONS_FACTORS).fillna(EMISSIONS_FACTORS.get('Electricity', 300))
+    df['carbon_kg'] = df['value_gwh'] * 1000 * df['emissions_factor']
+    return df
 
-def plot_time_series(df, country):
-    plt.figure(figsize=(10,6))
-    plt.plot(df["month"], df["total_gen"], label="Total Generation")
-    plt.plot(df["month"], df["household_cons"], label="Household Consumption")
-    plt.title(f"{country} Power Generation and Consumption")
-    plt.xlabel("Month")
-    plt.ylabel("GWh")
-    plt.legend()
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
+def export_for_tableau():
+    export_dir = TABLEAU_EXPORT_DIR
+    os.makedirs(export_dir, exist_ok=True)
+    files_to_export = [
+        MERGED_DATA_CSV,
+        FORECAST_BY_TYPE_CSV,
+        ANOMALIES_CSV,
+        CARBON_REPORT_CSV
+    ]
+    for fname in files_to_export:
+        if os.path.exists(fname):
+            shutil.copy(fname, os.path.join(export_dir, fname))
+    print(f"Exported latest CSVs to {export_dir}/ for Tableau.")
+
+def main():
+    df = pd.read_csv(MERGED_DATA_CSV)
+    # Anomaly Detection
+    anomalies = detect_anomalies(df)
+    anomalies.to_csv(ANOMALIES_CSV, index=False)
+    print(f"Anomalies saved to {ANOMALIES_CSV}: {len(anomalies)} records.")
+    # Carbon Tracking
+    carbon_df = calculate_carbon(df)
+    carbon_report = carbon_df.groupby('month').agg({'carbon_kg': 'sum'}).reset_index()
+    carbon_report.to_csv(CARBON_REPORT_CSV, index=False)
+    print(f"Carbon report saved to {CARBON_REPORT_CSV}.")
+    export_for_tableau()
 
 if __name__ == "__main__":
-    for country in COUNTRIES:
-        df = monthly_summary(country)
-        plot_time_series(df, country)
+    main()
