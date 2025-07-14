@@ -1,4 +1,5 @@
 import pandas as pd
+from config import COUNTRIES, MERGED_DATA_CSV, WEATHER_COLS
 
 def clean_iea(df):
     # Standardize column names
@@ -21,7 +22,7 @@ def clean_iea(df):
     def parse_custom_date(date_str):
         return pd.to_datetime('20' + date_str, format='%Y-%b')
     df['month'] = df['month'].apply(parse_custom_date).dt.to_period('M').astype(str)
-    df = df[df['country'] == 'France']
+    df = df[df['country'].isin(COUNTRIES)]
     return df
 
 def clean_weather(df):
@@ -35,7 +36,7 @@ def clean_weather(df):
     if missing:
         raise ValueError(f"Missing required columns in weather data: {missing}")
     df = df.dropna(subset=['month', 'country'])
-    df = df[df['country'] == 'France']
+    df = df[df['country'].isin(COUNTRIES)]
     return df
 
 def merge_data(iea_df, weather_df):
@@ -48,13 +49,11 @@ def merge_data(iea_df, weather_df):
     return merged
 
 if __name__ == "__main__":
-    # Load data
-    iea = pd.read_csv("IEA_France_2023_2025.csv")
-    weather = pd.read_csv("weather_data.csv")
-    # Clean data
+    # Example usage for batch processing
+    iea = pd.read_csv('IEA_France_2023_2025.csv')
+    weather = pd.read_csv('weather_data.csv')
     iea = clean_iea(iea)
     weather = clean_weather(weather)
-    # Merge data
     merged = merge_data(iea, weather)
-    # Save merged data
-    merged.to_csv("merged_data.csv", index=False)
+    merged.to_csv(MERGED_DATA_CSV, index=False)
+    print(f"Merged data saved to {MERGED_DATA_CSV}")

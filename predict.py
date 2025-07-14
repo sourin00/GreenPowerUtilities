@@ -1,7 +1,7 @@
 import pandas as pd
 from prophet import Prophet
 from sqlalchemy import create_engine
-from config import DB_URI
+from config import DB_URI, MERGED_DATA_CSV, FORECAST_BY_TYPE_CSV, WEATHER_COLS, PROCESSED_WEATHER_COLS
 import numpy as np
 
 def fetch_consumption(country="France"):
@@ -24,7 +24,7 @@ def predict_peak(df, periods=12):
     forecast = model.predict(future)
     return forecast[["ds", "yhat", "yhat_lower", "yhat_upper"]]
 
-def predict_by_energy_type(input_csv="merged_data.csv", output_csv="forecast_by_type.csv", periods=12):
+def predict_by_energy_type(input_csv=MERGED_DATA_CSV, output_csv=FORECAST_BY_TYPE_CSV, periods=12):
     df = pd.read_csv(input_csv)
     forecasts = []
     for energy_type, group in df.groupby("production_type"):
@@ -45,10 +45,10 @@ def predict_by_energy_type(input_csv="merged_data.csv", output_csv="forecast_by_
     else:
         print("No forecasts generated. Check your data.")
 
-def predict_by_energy_type_with_weather(input_csv="merged_data.csv", output_csv="forecast_by_type.csv", periods=12):
+def predict_by_energy_type_with_weather(input_csv=MERGED_DATA_CSV, output_csv=FORECAST_BY_TYPE_CSV, periods=12):
     df = pd.read_csv(input_csv)
     forecasts = []
-    weather_cols = ["avg_temp_c", "precip_mm", "wind_kmh"]
+    weather_cols = PROCESSED_WEATHER_COLS
     for energy_type, group in df.groupby("production_type"):
         group = group.rename(columns={"month": "ds", "value_gwh": "y"})
         group = group.dropna(subset=["y", "ds"] + weather_cols)
@@ -58,22 +58,18 @@ def predict_by_energy_type_with_weather(input_csv="merged_data.csv", output_csv=
         for col in weather_cols:
             model.add_regressor(col)
         model.fit(group[["ds", "y"] + weather_cols])
-        # Prepare future dataframe
         future = model.make_future_dataframe(periods=periods, freq='M')
-        # Fill weather columns for future periods
         for col in weather_cols:
             history_vals = group[col].values
             last_val = history_vals[-1]
             n_history = len(history_vals)
             n_future = len(future)
             if n_future > n_history:
-                # Pad with last value for forecast periods
                 future_vals = np.concatenate([
                     history_vals,
                     np.full(n_future - n_history, last_val)
                 ])
             else:
-                # Truncate history to fit future
                 future_vals = history_vals[:n_future]
             future[col] = future_vals
         forecast = model.predict(future)

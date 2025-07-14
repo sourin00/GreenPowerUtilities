@@ -1,5 +1,5 @@
 import pandas as pd
-from config import IEA_CSV
+from config import IEA_CSV, COUNTRIES
 
 def load_iea_data():
     df = pd.read_csv(IEA_CSV)
@@ -12,7 +12,7 @@ def load_iea_data():
     df = df.rename(columns={'Time': 'month'})
     # Convert 'month' to standard YYYY-MM format
     df['month'] = pd.to_datetime(df['month'], format='%y-%b').dt.to_period('M').astype(str)
-    df = df[df['country'] == 'France']
+    df = df[df['country'].isin(COUNTRIES)]
     return df
 
 if __name__ == "__main__":

@@ -4,23 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import shutil
 import os
-
-# Emissions factors in kg CO2e per MWh (example values, adjust as needed)
-EMISSIONS_FACTORS = {
-    'Coal, Peat and Manufactured Gases': 820,
-    'Oil and Petroleum Products': 650,
-    'Natural Gas': 490,
-    'Nuclear': 12,
-    'Hydro': 24,
-    'Wind': 11,
-    'Solar': 45,
-    'Geothermal': 38,
-    'Other Renewables': 30,
-    'Combustible Renewables': 230,
-    'Other Combustible Non-Renewables': 400,
-    'Electricity': 300,  # fallback
-    'Not Specified': 300,  # fallback
-}
+from config import EMISSIONS_FACTORS, MERGED_DATA_CSV, ANOMALIES_CSV, CARBON_REPORT_CSV, TABLEAU_EXPORT_DIR, FORECAST_BY_TYPE_CSV, PROCESSED_WEATHER_COLS
 
 def detect_anomalies(df, window=12, threshold=3):
     df = df.copy()
@@ -30,7 +14,7 @@ def detect_anomalies(df, window=12, threshold=3):
 
 def calculate_carbon(df):
     df = df.copy()
-    df['emissions_factor'] = df['production_type'].map(EMISSIONS_FACTORS).fillna(300)
+    df['emissions_factor'] = df['production_type'].map(EMISSIONS_FACTORS).fillna(EMISSIONS_FACTORS.get('Electricity', 300))
     df['carbon_kg'] = df['value_gwh'] * 1000 * df['emissions_factor']  # GWh to MWh
     return df
 
@@ -74,14 +58,36 @@ def plot_carbon(carbon_report):
     plt.savefig('carbon_emissions_plot.png')
     plt.show()
 
+def plot_weather_vs_consumption(df):
+    df = df.copy()
+    df['month'] = pd.to_datetime(df['month'])
+    fig, axs = plt.subplots(len(PROCESSED_WEATHER_COLS), 1, figsize=(12, 5 * len(PROCESSED_WEATHER_COLS)), sharex=True)
+    for i, col in enumerate(PROCESSED_WEATHER_COLS):
+        ax = axs[i] if len(PROCESSED_WEATHER_COLS) > 1 else axs
+        ax2 = ax.twinx()
+        ax.plot(df['month'], df['value_gwh'], color='tab:blue', label='Consumption (GWh)')
+        ax2.plot(df['month'], df[col], color='tab:orange', label=col)
+        ax.set_ylabel('Consumption (GWh)', color='tab:blue')
+        ax2.set_ylabel(col, color='tab:orange')
+        ax.set_title(f'Consumption vs {col}')
+        ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+        ax.tick_params(axis='x', rotation=45)
+        ax.grid()
+        ax.legend(loc='upper left')
+        ax2.legend(loc='upper right')
+    plt.tight_layout()
+    plt.savefig('weather_vs_consumption.png')
+    plt.show()
+
 def export_for_tableau():
-    export_dir = 'tableau_exports'
+    export_dir = TABLEAU_EXPORT_DIR
     os.makedirs(export_dir, exist_ok=True)
     files_to_export = [
-        'merged_data.csv',
-        'forecast_by_type.csv',
-        'anomalies.csv',
-        'carbon_report.csv'
+        MERGED_DATA_CSV,
+        FORECAST_BY_TYPE_CSV,
+        ANOMALIES_CSV,
+        CARBON_REPORT_CSV
     ]
     for fname in files_to_export:
         if os.path.exists(fname):
@@ -89,19 +95,20 @@ def export_for_tableau():
     print(f"Exported latest CSVs to {export_dir}/ for Tableau.")
 
 def main():
-    df = pd.read_csv('merged_data.csv')
+    df = pd.read_csv(MERGED_DATA_CSV)
     # Anomaly Detection
     anomalies = detect_anomalies(df)
-    anomalies.to_csv('anomalies.csv', index=False)
-    print(f"Anomalies saved to anomalies.csv: {len(anomalies)} records.")
+    anomalies.to_csv(ANOMALIES_CSV, index=False)
+    print(f"Anomalies saved to {ANOMALIES_CSV}: {len(anomalies)} records.")
     # Carbon Tracking
     carbon_df = calculate_carbon(df)
     carbon_report = carbon_df.groupby('month').agg({'carbon_kg': 'sum'}).reset_index()
-    carbon_report.to_csv('carbon_report.csv', index=False)
-    print(f"Carbon report saved to carbon_report.csv.")
+    carbon_report.to_csv(CARBON_REPORT_CSV, index=False)
+    print(f"Carbon report saved to {CARBON_REPORT_CSV}.")
     # Visualization
     plot_anomalies(anomalies)
     plot_carbon(carbon_report)
+    plot_weather_vs_consumption(df)
     export_for_tableau()
 
 if __name__ == "__main__":

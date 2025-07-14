@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from config import WEATHER_API_BASE, LOCATIONS, START_YEAR, END_YEAR
+from config import WEATHER_API_BASE, LOCATIONS, START_YEAR, END_YEAR, COUNTRIES, WEATHER_COLS, PROCESSED_WEATHER_COLS
 
 CURRENT_DATE = datetime.strptime("2025-07-13", "%Y-%m-%d")
 
@@ -65,7 +65,7 @@ def fetch_weather(country, lat, lon):
                 "longitude": lon,
                 "start_date": start_date,
                 "end_date": end_date,
-                "daily": ["temperature_2m_max", "temperature_2m_min", "precipitation_sum", "wind_speed_10m_max"],
+                "daily": WEATHER_COLS,
                 "timezone": "Europe/Paris"
             }
             resp = requests.get(WEATHER_API_BASE, params=params)
@@ -76,28 +76,20 @@ def fetch_weather(country, lat, lon):
                     break
                 else:
                     continue
-
-            if (
-                    'daily' in data and
-                    data['daily'].get('temperature_2m_max') is not None and
-                    data['daily'].get('temperature_2m_min') is not None
-            ):
-                avg_temp = safe_mean(data["daily"]["temperature_2m_max"], data["daily"]["temperature_2m_min"])
-                precip_mm = safe_sum(data["daily"].get("precipitation_sum"))
-                wind_kmh = np.nanmean(np.array(data["daily"].get("wind_speed_10m_max", []), dtype=float))
-                records.append({
-                    "country": country,
-                    "month": f"{year}-{month:02d}",
-                    "avg_temp_c": float(np.mean(avg_temp)) if avg_temp is not None else None,
-                    "precip_mm": float(precip_mm) if precip_mm is not None else None,
-                    "wind_kmh": float(wind_kmh) if not np.isnan(wind_kmh) else None
-                })
-            else:
-                print(f"Missing daily data for {country} {year}-{month:02d}: {data}")
-                if last_iteration:
-                    break
-                else:
-                    continue
+            daily = data['daily']
+            # Compute processed weather columns
+            avg_temp = None
+            if 'temperature_2m_max' in daily and 'temperature_2m_min' in daily:
+                avg_temp = safe_mean(daily["temperature_2m_max"], daily["temperature_2m_min"])
+            precip_mm = safe_sum(daily.get("precipitation_sum"))
+            wind_kmh = np.nanmean(np.array(daily.get("wind_speed_10m_max", []), dtype=float))
+            records.append({
+                "country": country,
+                "month": f"{year}-{month:02d}",
+                "avg_temp_c": float(np.mean(avg_temp)) if avg_temp is not None else None,
+                "precip_mm": float(precip_mm) if precip_mm is not None else None,
+                "wind_kmh": float(wind_kmh) if not np.isnan(wind_kmh) else None
+            })
     return pd.DataFrame(records)
 
 

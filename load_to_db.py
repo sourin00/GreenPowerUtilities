@@ -1,21 +1,21 @@
 import pandas as pd
 from sqlalchemy import create_engine
-from config import DB_URI
+from config import DB_URI, MERGED_DATA_CSV, COUNTRIES, WEATHER_COLS, PROCESSED_WEATHER_COLS
 
 # Load merged data
-merged = pd.read_csv("merged_data.csv")
+merged = pd.read_csv(MERGED_DATA_CSV)
 
 # --- POWER DATA ---
 # Select production rows (e.g., Balance == 'Total Net Production')
 power = merged[
-    (merged['country'] == 'France') &
+    (merged['country'].isin(COUNTRIES)) &
     (merged['Balance'].str.strip() == 'Total Net Production')
 ][["country", "month", "production_type", "value_gwh"]]
 
 # --- CONSUMPTION DATA ---
 # Select total consumption rows (e.g., Balance == 'Final Consumption Calculated')
 consumption = merged[
-    (merged['country'] == 'France') &
+    (merged['country'].isin(COUNTRIES)) &
     (merged['Balance'].str.strip() == 'Final Consumption (Calculated)')
 ][["country", "month", "value_gwh"]].rename(columns={'value_gwh': 'total_consumption_gwh'})
 
@@ -24,8 +24,7 @@ consumption['household_consumption_gwh'] = consumption['total_consumption_gwh'] 
 
 # --- WEATHER DATA ---
 # Select relevant weather columns (these may already be merged for each month)
-weather_cols = ["country", "month", "avg_temp_c", "precip_mm", "wind_kmh"]
-weather = merged[weather_cols].drop_duplicates()
+weather = merged[PROCESSED_WEATHER_COLS + ["country", "month"]].drop_duplicates()
 
 # --- LOAD TO DATABASE ---
 engine = create_engine(DB_URI)
