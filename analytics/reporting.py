@@ -1,6 +1,9 @@
 """
 Handles all analytics, anomaly detection, carbon tracking, and reporting logic.
 """
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 import numpy as np
 import os
@@ -19,20 +22,6 @@ def calculate_carbon(df):
     df['carbon_kg'] = df['value_gwh'] * 1000 * df['emissions_factor']
     return df
 
-def export_for_tableau():
-    export_dir = TABLEAU_EXPORT_DIR
-    os.makedirs(export_dir, exist_ok=True)
-    files_to_export = [
-        MERGED_DATA_CSV,
-        FORECAST_BY_TYPE_CSV,
-        ANOMALIES_CSV,
-        CARBON_REPORT_CSV
-    ]
-    for fname in files_to_export:
-        if os.path.exists(fname):
-            shutil.copy(fname, os.path.join(export_dir, fname))
-    print(f"Exported latest CSVs to {export_dir}/ for Tableau.")
-
 def main():
     df = pd.read_csv(MERGED_DATA_CSV)
     # Anomaly Detection
@@ -44,7 +33,6 @@ def main():
     carbon_report = carbon_df.groupby('month').agg({'carbon_kg': 'sum'}).reset_index()
     carbon_report.to_csv(CARBON_REPORT_CSV, index=False)
     print(f"Carbon report saved to {CARBON_REPORT_CSV}.")
-    export_for_tableau()
 
 if __name__ == "__main__":
     main()

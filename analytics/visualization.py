@@ -2,13 +2,16 @@
 """
 Handles all plotting and visualization logic for forecasts, analytics, and weather relationships.
 """
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os
-from config import FORECAST_BY_TYPE_CSV, PROCESSED_WEATHER_COLS
+from config import FORECAST_BY_TYPE_CSV, PROCESSED_WEATHER_COLS, PLOTS_DIR, FORECAST_PLOTS_DIR, ANOMALIES_CSV, CARBON_REPORT_CSV, MERGED_DATA_CSV
 
-def plot_forecasts_by_type(forecast_csv=FORECAST_BY_TYPE_CSV, output_dir="forecast_plots_by_type"):
+def plot_forecasts_by_type(forecast_csv=FORECAST_BY_TYPE_CSV, output_dir=FORECAST_PLOTS_DIR):
     forecast = pd.read_csv(forecast_csv)
     energy_types = forecast["production_type"].unique()
     os.makedirs(output_dir, exist_ok=True)
@@ -29,11 +32,12 @@ def plot_forecasts_by_type(forecast_csv=FORECAST_BY_TYPE_CSV, output_dir="foreca
         plt.tight_layout()
         plt.grid()
         plot_path = os.path.join(output_dir, f"forecast_{energy}.png")
+        print(f"Saving plot for {energy} to {plot_path}")
         plt.savefig(plot_path)
         plt.close()
         print(f"Saved plot for {energy} to {plot_path}")
 
-def plot_weather_vs_consumption(df, output_file="weather_vs_consumption.png"):
+def plot_weather_vs_consumption(df, output_file=os.path.join(PLOTS_DIR, "weather_vs_consumption.png")):
     df = df.copy()
     df['month'] = pd.to_datetime(df['month'])
     fig, axs = plt.subplots(len(PROCESSED_WEATHER_COLS), 1, figsize=(12, 5 * len(PROCESSED_WEATHER_COLS)), sharex=True)
@@ -55,7 +59,7 @@ def plot_weather_vs_consumption(df, output_file="weather_vs_consumption.png"):
     plt.savefig(output_file)
     plt.show()
 
-def plot_anomalies(anomalies, output_file="anomalies_plot.png"):
+def plot_anomalies(anomalies, output_file=os.path.join(PLOTS_DIR, "anomalies_plot.png")):
     if anomalies.empty:
         print("No anomalies to plot.")
         return
@@ -78,7 +82,7 @@ def plot_anomalies(anomalies, output_file="anomalies_plot.png"):
     plt.savefig(output_file)
     plt.show()
 
-def plot_carbon(carbon_report, output_file="carbon_emissions_plot.png"):
+def plot_carbon(carbon_report, output_file=os.path.join(PLOTS_DIR, "carbon_emissions_plot.png")):
     carbon_report = carbon_report.copy()
     carbon_report['month'] = pd.to_datetime(carbon_report['month'])
     plt.figure(figsize=(12,6))
@@ -98,24 +102,25 @@ def plot_carbon(carbon_report, output_file="carbon_emissions_plot.png"):
 if __name__ == "__main__":
     # Plot forecasts by type if forecast_by_type.csv exists
     if os.path.exists(FORECAST_BY_TYPE_CSV):
+        print(f"Generating forecast plots in {FORECAST_PLOTS_DIR} from {FORECAST_BY_TYPE_CSV}")
         plot_forecasts_by_type()
     else:
         print(f"{FORECAST_BY_TYPE_CSV} not found. Skipping forecast plots.")
     # Plot weather vs consumption if merged_data.csv exists
-    if os.path.exists("merged_data.csv"):
-        df = pd.read_csv("merged_data.csv")
+    if os.path.exists(MERGED_DATA_CSV):
+        df = pd.read_csv(MERGED_DATA_CSV)
         plot_weather_vs_consumption(df)
     else:
-        print("merged_data.csv not found. Skipping weather vs consumption plot.")
+        print(f"{MERGED_DATA_CSV} not found. Skipping weather vs consumption plot.")
     # Plot anomalies if anomalies.csv exists
-    if os.path.exists("anomalies.csv"):
-        anomalies = pd.read_csv("anomalies.csv")
+    if os.path.exists(ANOMALIES_CSV):
+        anomalies = pd.read_csv(ANOMALIES_CSV)
         plot_anomalies(anomalies)
     else:
-        print("anomalies.csv not found. Skipping anomalies plot.")
+        print(f"{ANOMALIES_CSV} not found. Skipping anomalies plot.")
     # Plot carbon emissions if carbon_report.csv exists
-    if os.path.exists("carbon_report.csv"):
-        carbon_report = pd.read_csv("carbon_report.csv")
+    if os.path.exists(CARBON_REPORT_CSV):
+        carbon_report = pd.read_csv(CARBON_REPORT_CSV)
         plot_carbon(carbon_report)
     else:
-        print("carbon_report.csv not found. Skipping carbon emissions plot.")
+        print(f"{CARBON_REPORT_CSV} not found. Skipping carbon emissions plot.")

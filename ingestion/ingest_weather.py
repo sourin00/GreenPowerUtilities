@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from calendar import monthrange
 from datetime import datetime
 
@@ -5,7 +9,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from config import WEATHER_API_BASE, LOCATIONS, START_YEAR, END_YEAR, COUNTRIES, WEATHER_COLS, PROCESSED_WEATHER_COLS
+from config import WEATHER_API_BASE, LOCATIONS, START_YEAR, END_YEAR, COUNTRIES, WEATHER_COLS, PROCESSED_WEATHER_COLS, WEATHER_DATA_CSV
 
 CURRENT_DATE = datetime.strptime("2025-07-13", "%Y-%m-%d")
 
@@ -101,7 +105,7 @@ def main():
         df = fetch_weather(country, loc["lat"], loc["lon"])
         dfs.append(df)
     weather_df = pd.concat(dfs, ignore_index=True)
-    weather_df.to_csv("weather_data.csv", index=False)
+    weather_df.to_csv(WEATHER_DATA_CSV, index=False)
 
 
 if __name__ == "__main__":

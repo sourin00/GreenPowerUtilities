@@ -2,11 +2,14 @@
 """
 Handles all prediction and forecasting logic, including weather-aware forecasts.
 """
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 import numpy as np
 from prophet import Prophet
 from sqlalchemy import create_engine
-from config import MERGED_DATA_CSV, FORECAST_BY_TYPE_CSV, PROCESSED_WEATHER_COLS, DB_URI
+from config import MERGED_DATA_CSV, FORECAST_BY_TYPE_CSV, PROCESSED_WEATHER_COLS, DB_URI, FORECAST_RESULTS_CSV
 
 def predict_by_energy_type(input_csv=MERGED_DATA_CSV, output_csv=FORECAST_BY_TYPE_CSV, periods=12):
     df = pd.read_csv(input_csv)
@@ -94,5 +97,5 @@ if __name__ == "__main__":
     if len(df) < 2:
         raise ValueError("Not enough data to fit the model. Check your database and data extraction.")
     forecast = predict_peak(df)
-    forecast.to_csv("forecast_results.csv", index=False)
+    forecast.to_csv(FORECAST_RESULTS_CSV, index=False)
     print(forecast.tail())
