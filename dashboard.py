@@ -157,55 +157,73 @@ if 'forecast_total' in locals() and not forecast_total.empty and 'ds' in forecas
     )
 
 # --- Streamlit Layout ---
-st.set_page_config(page_title='GreenPower Dashboard', layout='wide')
+st.set_page_config(page_title='GreenPower Dashboard', layout='wide', page_icon=':bar_chart:')
+st.markdown('<style>div.block-container{padding-top:2rem;} .stHeader {color:#2E8B57;} .st-emotion-cache-1v0mbdj {background: #f5f7fa;} .st-emotion-cache-1v0mbdj h1 {color: #2E8B57;} .st-emotion-cache-1v0mbdj h2 {color: #1976D2;} .st-emotion-cache-1v0mbdj h3 {color: #388E3C;} .st-emotion-cache-1v0mbdj h4 {color: #F57C00;} .st-emotion-cache-1v0mbdj h5 {color: #C62828;} .st-emotion-cache-1v0mbdj h6 {color: #6D4C41;} .stDataFrame {background: #f9f9f9; border-radius: 10px; box-shadow: 0 2px 8px #b2dfdb;} .stPlotlyChart {background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #b2dfdb;}</style>', unsafe_allow_html=True)
 st.title('GreenPower Data Dashboard')
-st.markdown('This dashboard provides a comprehensive overview of power generation, consumption, weather impact, anomalies, carbon emissions, and forecasts for energy data. Use the visualizations and tables below to explore trends, detect issues, and support data-driven decisions.')
+st.markdown('''<div style="font-size:18px; color:#444; background:#e3f2fd; border-radius:8px; padding:18px 24px; margin-bottom:30px; border-left: 6px solid #1976D2;">\
+<b>Welcome!</b> This dashboard provides a <b>comprehensive overview</b> of power generation, consumption, weather impact, anomalies, carbon emissions, and forecasts for energy data.<br>\
+Use the visualizations and tables below to <b>explore trends</b>, <b>detect issues</b>, and <b>support data-driven decisions</b>.<br>\
+</div>''', unsafe_allow_html=True)
 
-st.header('Power Production Distribution')
+# Add a sidebar with logo and navigation
+st.sidebar.image('https://img.icons8.com/color/96/renewable-energy.png', width=80)
+st.sidebar.title('GreenPower Utilities')
+st.sidebar.markdown('''---\n**Navigation**\n- Overview\n- Production\n- Consumption\n- Weather\n- Anomalies\n- Carbon\n- Forecasts\n''')
+
+# --- Section: Power Production Distribution ---
+st.header('⚡ Power Production Distribution')
 st.write('Visualizes the monthly distribution of power production by type. Use this to identify which energy sources contribute most to the grid and how production varies over time.')
 st.plotly_chart(fig, use_container_width=True)
 
-st.header('Monthly Production Summary')
+# --- Section: Monthly Production Summary ---
+st.header('📊 Monthly Production Summary')
 st.write('Tabular summary of total power produced each month, broken down by production type. Useful for quick comparisons and reporting.')
-st.dataframe(summary, use_container_width=True)
+st.dataframe(summary, use_container_width=True, hide_index=True)
 
-st.header('Monthly Consumption')
+# --- Section: Monthly Consumption ---
+st.header('🔌 Monthly Consumption')
 st.write('Shows the total electricity consumption per month for each country. Track demand trends and seasonal patterns.')
 st.plotly_chart(fig_consumption, use_container_width=True)
 
-st.header('Weather vs Consumption')
+# --- Section: Weather vs Consumption ---
+st.header('🌦️ Weather vs Consumption')
 st.write('Examines the relationship between average temperature and electricity consumption. Helps understand how weather impacts energy demand.')
 if fig_weather:
     st.plotly_chart(fig_weather, use_container_width=True)
 else:
     st.info('Weather data not available.')
 
-st.header('Anomalies in Power Data')
+# --- Section: Anomalies in Power Data ---
+st.header('🚨 Anomalies in Power Data')
 st.write('Highlights unusual or unexpected values in power data using statistical anomaly detection. Use this to quickly spot data quality issues or operational outliers.')
 if fig_anomalies:
     st.plotly_chart(fig_anomalies, use_container_width=True)
 else:
     st.info('Anomaly data not available.')
 
-st.header('Carbon Emissions')
+# --- Section: Carbon Emissions ---
+st.header('🌱 Carbon Emissions')
 st.write('Displays the monthly carbon emissions associated with power production. Track progress towards sustainability and emissions reduction goals.')
 if fig_carbon:
     st.plotly_chart(fig_carbon, use_container_width=True)
 else:
     st.info('Carbon emissions data not available.')
 
-st.header('Carbon Emissions Report')
+# --- Section: Carbon Emissions Report ---
+st.header('📋 Carbon Emissions Report')
 st.write('Detailed table of carbon emissions data for further analysis and reporting.')
 if not carbon_summary.empty:
-    st.dataframe(carbon_summary, use_container_width=True)
+    st.dataframe(carbon_summary, use_container_width=True, hide_index=True)
 else:
     st.info('Carbon report not available.')
 
-st.header('Raw Power Data')
+# --- Section: Raw Power Data ---
+st.header('🗃️ Raw Power Data')
 st.write('Full raw power data for transparency and custom analysis. Use filters and sorting to explore the dataset.')
-st.dataframe(df, use_container_width=True)
+st.dataframe(df, use_container_width=True, hide_index=True)
 
-st.header('Forecasts')
+# --- Section: Forecasts ---
+st.header('🔮 Forecasts')
 st.write('Forecasts future power production using statistical models. Includes uncertainty intervals to support planning and risk assessment.')
 if fig_forecast_total:
     st.plotly_chart(fig_forecast_total, use_container_width=True)
@@ -216,7 +234,8 @@ if fig_forecast_type:
 else:
     st.info('Forecast by type data not available.')
 
-st.header('Forecasted Carbon Emissions')
+# --- Section: Forecasted Carbon Emissions ---
+st.header('🌍 Forecasted Carbon Emissions')
 st.write('This graph estimates future carbon emissions based on forecasted power production and average historical carbon intensity. Use it to visualize the expected impact of decarbonization efforts and energy transition policies.')
 if fig_forecasted_carbon:
     st.plotly_chart(fig_forecasted_carbon, use_container_width=True)
