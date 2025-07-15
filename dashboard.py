@@ -154,15 +154,53 @@ if os.path.exists(forecast_type_path):
             fig_forecast_type.data[-2].name = f'{prod_type} Upper Bound'
             fig_forecast_type.data[-1].name = f'{prod_type} Lower Bound'
 
+# --- Forecasted Carbon Emissions Graph ---
+# Estimate future carbon emissions based on forecasted power production
+fig_forecasted_carbon = None
+if not forecast_total.empty and 'ds' in forecast_total.columns and 'yhat' in forecast_total.columns:
+    # Calculate average carbon intensity from historical data
+    if not carbon_report.empty and 'carbon_kg' in carbon_report.columns and 'month' in carbon_report.columns:
+        # Try to get matching power data for the same months
+        if 'month' in df.columns and 'value_gwh' in df.columns:
+            merged_hist = pd.merge(
+                carbon_report, df.groupby('month')['value_gwh'].sum().reset_index(),
+                on='month', how='inner')
+            merged_hist = merged_hist[merged_hist['value_gwh'] > 0]
+            if not merged_hist.empty:
+                avg_carbon_intensity = merged_hist['carbon_kg'].sum() / merged_hist['value_gwh'].sum()
+            else:
+                avg_carbon_intensity = 0
+        else:
+            avg_carbon_intensity = 0
+    else:
+        avg_carbon_intensity = 0
+    # Estimate forecasted carbon emissions
+    forecasted_carbon = forecast_total.copy()
+    forecasted_carbon['forecasted_carbon_kg'] = forecasted_carbon['yhat'] * avg_carbon_intensity
+    fig_forecasted_carbon = px.line(
+        forecasted_carbon,
+        x='ds',
+        y='forecasted_carbon_kg',
+        title='Forecasted Carbon Emissions',
+        labels={'forecasted_carbon_kg': 'Forecasted Carbon Emissions (kg)', 'ds': 'Month'}
+    )
+
 # Dash app layout
 app = dash.Dash(__name__)
 app.title = 'GreenPower Dashboard'
 app.layout = html.Div([
     html.H1('GreenPower Data Dashboard', style={'textAlign': 'center', 'color': '#2E8B57', 'marginTop': 20}),
+    html.P(
+        'This dashboard provides a comprehensive overview of power generation, consumption, weather impact, anomalies, carbon emissions, and forecasts for energy data. Use the visualizations and tables below to explore trends, detect issues, and support data-driven decisions.',
+        style={'textAlign': 'center', 'color': '#333', 'fontSize': '18px', 'marginBottom': '30px'}
+    ),
     html.Div([
+        html.H2('Power Production Distribution', style={'color': '#1976D2'}),
+        html.P('Visualizes the monthly distribution of power production by type. Use this to identify which energy sources contribute most to the grid and how production varies over time.', style={'color': '#333'}),
         dcc.Graph(figure=fig, style={'backgroundColor': '#f9f9f9', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #b2dfdb'}),
     ], style={'margin': '30px 0'}),
     html.H2('Monthly Production Summary', style={'color': '#1976D2'}),
+    html.P('Tabular summary of total power produced each month, broken down by production type. Useful for quick comparisons and reporting.', style={'color': '#333'}),
     dash_table.DataTable(
         data=summary.to_dict('records'),
         columns=[{"name": i, "id": i} for i in summary.columns],
@@ -173,14 +211,19 @@ app.layout = html.Div([
         style_data={'backgroundColor': '#e3f2fd'},
     ),
     html.H2('Monthly Consumption', style={'color': '#388E3C'}),
+    html.P('Shows the total electricity consumption per month for each country. Track demand trends and seasonal patterns.', style={'color': '#333'}),
     dcc.Graph(figure=fig_consumption, style={'backgroundColor': '#f9fbe7', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #b2dfdb'}),
     html.H2('Weather vs Consumption', style={'color': '#F57C00'}),
+    html.P('Examines the relationship between average temperature and electricity consumption. Helps understand how weather impacts energy demand.', style={'color': '#333'}),
     dcc.Graph(figure=fig_weather, style={'backgroundColor': '#fff3e0', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #ffe0b2'}) if fig_weather else html.Div('Weather data not available.'),
     html.H2('Anomalies in Power Data', style={'color': '#C62828'}),
+    html.P('Highlights unusual or unexpected values in power data using statistical anomaly detection. Use this to quickly spot data quality issues or operational outliers.', style={'color': '#333'}),
     dcc.Graph(figure=fig_anomalies, style={'backgroundColor': '#ffebee', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #ffcdd2'}) if fig_anomalies else html.Div('Anomaly data not available.'),
     html.H2('Carbon Emissions', style={'color': '#6D4C41'}),
+    html.P('Displays the monthly carbon emissions associated with power production. Track progress towards sustainability and emissions reduction goals.', style={'color': '#333'}),
     dcc.Graph(figure=fig_carbon, style={'backgroundColor': '#efebe9', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #bcaaa4'}) if fig_carbon else html.Div('Carbon emissions data not available.'),
     html.H2('Carbon Emissions Report', style={'color': '#6D4C41'}),
+    html.P('Detailed table of carbon emissions data for further analysis and reporting.', style={'color': '#333'}),
     dash_table.DataTable(
         data=carbon_summary.to_dict('records'),
         columns=[{"name": i, "id": i} for i in carbon_summary.columns] if not carbon_summary.empty else [],
@@ -191,6 +234,7 @@ app.layout = html.Div([
         style_data={'backgroundColor': '#ffccbc'},
     ) if not carbon_summary.empty else html.Div('Carbon report not available.'),
     html.H2('Raw Power Data', style={'color': '#512DA8'}),
+    html.P('Full raw power data for transparency and custom analysis. Use filters and sorting to explore the dataset.', style={'color': '#333'}),
     dash_table.DataTable(
         data=df.to_dict('records'),
         columns=[{"name": i, "id": i} for i in df.columns],
@@ -201,8 +245,12 @@ app.layout = html.Div([
         style_data={'backgroundColor': '#d1c4e9'},
     ),
     html.H2('Forecasts', style={'color': '#0288D1'}),
+    html.P('Forecasts future power production using statistical models. Includes uncertainty intervals to support planning and risk assessment.', style={'color': '#333'}),
     dcc.Graph(figure=fig_forecast_total, style={'backgroundColor': '#e1f5fe', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #b3e5fc'}) if fig_forecast_total else html.Div('Total forecast data not available.'),
     dcc.Graph(figure=fig_forecast_type, style={'backgroundColor': '#e1f5fe', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #b3e5fc'}) if fig_forecast_type else html.Div('Forecast by type data not available.'),
+    html.H2('Forecasted Carbon Emissions', style={'color': '#009688'}),
+    html.P('This graph estimates future carbon emissions based on forecasted power production and average historical carbon intensity. Use it to visualize the expected impact of decarbonization efforts and energy transition policies.', style={'color': '#333'}),
+    dcc.Graph(figure=fig_forecasted_carbon, style={'backgroundColor': '#e0f2f1', 'borderRadius': '10px', 'boxShadow': '0 2px 8px #80cbc4'}) if fig_forecasted_carbon else html.Div('Forecasted carbon emissions data not available.'),
 ], style={'fontFamily': 'Segoe UI, Arial, sans-serif', 'backgroundColor': '#fafafa', 'padding': '20px 40px'})
 
 if __name__ == '__main__':
