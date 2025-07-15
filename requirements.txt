@@ -10,3 +10,4 @@ numpy~=2.3.1
 plotly~=6.2.0
 dash~=3.1.1
 streamlit~=1.46.1
+pytest~=8.4.1
