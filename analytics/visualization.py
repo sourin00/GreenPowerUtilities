@@ -32,7 +32,7 @@ def plot_forecasts_by_type(forecast_csv=FORECAST_BY_TYPE_CSV, output_dir=FORECAS
         plt.tight_layout()
         plt.grid()
         plot_path = os.path.join(output_dir, f"forecast_{energy}.png")
-        print(f"Saving plot for {energy} to {plot_path}")
+
         plt.savefig(plot_path)
         plt.close()
         print(f"Saved plot for {energy} to {plot_path}")

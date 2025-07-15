@@ -166,7 +166,10 @@ Use the visualizations and tables below to <b>explore trends</b>, <b>detect issu
 </div>''', unsafe_allow_html=True)
 
 # Add a sidebar with logo and navigation
-st.sidebar.image('data/logo.png', width=80)
+if os.path.exists('data/logo.png'):
+    st.sidebar.image('data/logo.png', width=80)
+else:
+    st.sidebar.text("Logo not found")
 st.sidebar.title('GreenPower Utilities')
 st.sidebar.markdown('''---\n**Navigation**\n- Overview\n- Production\n- Consumption\n- Weather\n- Anomalies\n- Carbon\n- Forecasts\n''')
 

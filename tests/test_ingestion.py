@@ -3,7 +3,6 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pytest
 import pandas as pd
-import os
 from analytics.utils import clean_iea, merge_data
 from ingestion.ingest_iea import load_iea_data
 
