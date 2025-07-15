@@ -159,7 +159,7 @@ if 'forecast_total' in locals() and not forecast_total.empty and 'ds' in forecas
 # --- Streamlit Layout ---
 st.set_page_config(page_title='GreenPower Dashboard', layout='wide')
 st.title('GreenPower Data Dashboard')
-st.markdown('''<p style="text-align:center; color:#333; font-size:18px; margin-bottom:30px;">This dashboard provides a comprehensive overview of power generation, consumption, weather impact, anomalies, carbon emissions, and forecasts for energy data. Use the visualizations and tables below to explore trends, detect issues, and support data-driven decisions.</p>''', unsafe_allow_html=True)
+st.markdown('This dashboard provides a comprehensive overview of power generation, consumption, weather impact, anomalies, carbon emissions, and forecasts for energy data. Use the visualizations and tables below to explore trends, detect issues, and support data-driven decisions.')
 
 st.header('Power Production Distribution')
 st.write('Visualizes the monthly distribution of power production by type. Use this to identify which energy sources contribute most to the grid and how production varies over time.')
