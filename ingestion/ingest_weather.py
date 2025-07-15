@@ -72,6 +72,7 @@ def fetch_weather(country, lat, lon):
                 "daily": WEATHER_COLS,
                 "timezone": "Europe/Paris"
             }
+            print(f"Requesting weather data for {country} {year}-{month:02d} from {start_date} to {end_date}...")
             resp = requests.get(WEATHER_API_BASE, params=params)
             data = resp.json()
             if 'daily' not in data:
@@ -94,18 +95,23 @@ def fetch_weather(country, lat, lon):
                 "precip_mm": float(precip_mm) if precip_mm is not None else None,
                 "wind_kmh": float(wind_kmh) if not np.isnan(wind_kmh) else None
             })
+    print(f"Fetched weather data for {country}.")
     return pd.DataFrame(records)
 
 
 def main():
+    print("Starting weather data ingestion...")
     dfs = []
     for country, loc in LOCATIONS.items():
         if country != "France":
             continue
+        print(f"Processing country: {country}")
         df = fetch_weather(country, loc["lat"], loc["lon"])
         dfs.append(df)
     weather_df = pd.concat(dfs, ignore_index=True)
+    print(f"Saving weather data to {WEATHER_DATA_CSV}...")
     weather_df.to_csv(WEATHER_DATA_CSV, index=False)
+    print("Weather data ingestion completed.")
 
 
 if __name__ == "__main__":
