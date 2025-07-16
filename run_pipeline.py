@@ -18,8 +18,10 @@ def run_step(name, cmd):
     print(f"Command: {cmd}")
     try:
         result = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
+        print(f"STDOUT for {name}:")
         if result.stdout:
             print(result.stdout)
+        print(f"STDERR for {name}:")
         if result.stderr:
             print(result.stderr)
         print(f"{name} completed successfully.")
