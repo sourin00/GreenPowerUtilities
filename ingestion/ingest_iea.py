@@ -18,5 +18,3 @@ def load_iea_data():
 if __name__ == "__main__":
     df = load_iea_data()
     print(df.head())
-    import sys
-    sys.exit(0)
