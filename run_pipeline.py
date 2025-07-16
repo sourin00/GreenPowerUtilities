@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import time
 
 steps = [
     ("Fetch Power Data", [sys.executable, "-m", "ingestion.ingest_iea"]),
@@ -16,10 +17,21 @@ steps = [
 def run_step(name, cmd):
     print(f"\n=== Running: {name} ===")
     try:
-        result = subprocess.run(cmd, check=True)
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True, timeout=120)
+        if result.stdout:
+            print(result.stdout)
+        if result.stderr:
+            print(result.stderr)
         print(f"{name} completed successfully.")
+    except subprocess.TimeoutExpired:
+        print(f"Error: {name} timed out.")
+        sys.exit(1)
     except subprocess.CalledProcessError as e:
         print(f"Error in {name}: {e}")
+        if e.stdout:
+            print(e.stdout)
+        if e.stderr:
+            print(e.stderr)
         sys.exit(1)
 
 
