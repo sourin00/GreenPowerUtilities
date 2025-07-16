@@ -17,7 +17,6 @@ def load_iea_data():
 
 if __name__ == "__main__":
     df = load_iea_data()
-    print(df.head(2))
-    print("ingest_iea.py finished.")
+    print(df.head())
     import sys
     sys.exit(0)
