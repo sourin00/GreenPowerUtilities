@@ -25,10 +25,11 @@ jobs:
 
       - name: Run data pipeline
         run: |
-          python run_pipeline.py
+          python -m run_pipeline
 
       - name: Run tests
-        run: pytest
+        run: |
+          python -m pytest
 
       - name: Show Streamlit App URL
         if: success()
