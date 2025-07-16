@@ -57,7 +57,7 @@ def plot_weather_vs_consumption(df, output_file=os.path.join(PLOTS_DIR, "weather
         ax2.legend(loc='upper right')
     plt.tight_layout()
     plt.savefig(output_file)
-    plt.show()
+    #plt.show()
 
 def plot_anomalies(anomalies, output_file=os.path.join(PLOTS_DIR, "anomalies_plot.png")):
     if anomalies.empty:
@@ -80,7 +80,7 @@ def plot_anomalies(anomalies, output_file=os.path.join(PLOTS_DIR, "anomalies_plo
     plt.tight_layout()
     plt.grid()
     plt.savefig(output_file)
-    plt.show()
+    #plt.show()
 
 def plot_carbon(carbon_report, output_file=os.path.join(PLOTS_DIR, "carbon_emissions_plot.png")):
     carbon_report = carbon_report.copy()
@@ -97,7 +97,7 @@ def plot_carbon(carbon_report, output_file=os.path.join(PLOTS_DIR, "carbon_emiss
     plt.tight_layout()
     plt.grid()
     plt.savefig(output_file)
-    plt.show()
+    #plt.show()
 
 if __name__ == "__main__":
     # Plot forecasts by type if forecast_by_type.csv exists
