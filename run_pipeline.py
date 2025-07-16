@@ -15,11 +15,27 @@ steps = [
 
 def run_step(name, cmd):
     print(f"\n=== Running: {name} ===")
+    print(f"Command: {cmd}")
     try:
-        result = subprocess.run(cmd, check=True)
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        print(f"STDOUT for {name}:")
+        if result.stdout:
+            print(result.stdout)
+        print(f"STDERR for {name}:")
+        if result.stderr:
+            print(result.stderr)
         print(f"{name} completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error in {name}: {e}")
+        if e.stdout:
+            print(e.stdout)
+        if e.stderr:
+            print(e.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected exception in {name}: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 
