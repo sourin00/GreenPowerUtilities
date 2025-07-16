@@ -35,6 +35,11 @@ def run_step(name, cmd):
         if e.stderr:
             print(e.stderr)
         sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected exception in {name}: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
