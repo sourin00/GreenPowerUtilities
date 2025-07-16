@@ -40,12 +40,6 @@ def run_step(name, cmd):
 if __name__ == "__main__":
     for name, cmd in steps:
         print(f"About to run step: {name}")
-        try:
-            run_step(name, cmd)
-        except Exception as e:
-            print(f"Exception occurred in step '{name}': {e}")
-            import traceback
-            traceback.print_exc()
-            sys.exit(1)
+        run_step(name, cmd)
         print(f"Finished step: {name}")
     print("\nAll pipeline steps completed.")
