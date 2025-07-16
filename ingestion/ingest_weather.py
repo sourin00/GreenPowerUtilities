@@ -112,8 +112,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-    weather_df = pd.read_csv(WEATHER_DATA_CSV)
-    print(weather_df.head(2))
-    print("ingest_weather.py finished.")
     import sys
     sys.exit(0)
