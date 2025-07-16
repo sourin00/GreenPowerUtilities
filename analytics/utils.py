@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -79,4 +76,3 @@ def safe_sum(arr):
         return None
     arr = np.where(arr is None, np.nan, arr).astype(float)
     return np.nansum(arr)
-

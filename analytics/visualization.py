@@ -2,9 +2,6 @@
 """
 Handles all plotting and visualization logic for forecasts, analytics, and weather relationships.
 """
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates

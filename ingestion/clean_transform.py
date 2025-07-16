@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 from config import COUNTRIES, MERGED_DATA_CSV, WEATHER_COLS, IEA_CSV, WEATHER_DATA_CSV
 from analytics.utils import clean_iea, clean_weather, merge_data

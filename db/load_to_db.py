@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import pandas as pd
 from sqlalchemy import create_engine
 from config import DB_URI, MERGED_DATA_CSV, COUNTRIES, WEATHER_COLS, PROCESSED_WEATHER_COLS
