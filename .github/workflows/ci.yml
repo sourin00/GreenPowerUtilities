@@ -23,9 +23,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run data pipeline
+      - name: Run data pipeline (skip ingestion)
         run: |
-          python -m run_pipeline
+          python -m ingestion.clean_transform
+          python -m db.db_schema
+          python -m db.load_to_db
+          python -m analytics.forecasting
+          python -m analytics.reporting
+          python -m analytics.visualization
 
       - name: Run tests
         run: |
