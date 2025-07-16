@@ -2,14 +2,14 @@ import subprocess
 import sys
 
 steps = [
-    ("Fetch Power Data", [sys.executable, "ingestion/ingest_iea.py"]),
-    ("Fetch Weather Data", [sys.executable, "ingestion/ingest_weather.py"]),
-    ("Ingestion & Transformation", [sys.executable, "ingestion/clean_transform.py"]),
-    ("Create Schema", [sys.executable, "db/db_schema.py"]),
-    ("Load to DB", [sys.executable, "db/load_to_db.py"]),
-    ("Forecasting", [sys.executable, "analytics/forecasting.py"]),
-    ("Reporting", [sys.executable, "analytics/reporting.py"]),
-    ("Visualization", [sys.executable, "analytics/visualization.py"]),
+    ("Fetch Power Data", [sys.executable, "-m", "ingestion.ingest_iea"]),
+    ("Fetch Weather Data", [sys.executable, "-m", "ingestion.ingest_weather"]),
+    ("Ingestion & Transformation", [sys.executable, "-m", "ingestion.clean_transform"]),
+    ("Create Schema", [sys.executable, "-m", "db.db_schema"]),
+    ("Load to DB", [sys.executable, "-m", "db.load_to_db"]),
+    ("Forecasting", [sys.executable, "-m", "analytics.forecasting"]),
+    ("Reporting", [sys.executable, "-m", "analytics.reporting"]),
+    ("Visualization", [sys.executable, "-m", "analytics.visualization"]),
 ]
 
 
