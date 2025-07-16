@@ -96,3 +96,5 @@ if __name__ == "__main__":
     forecast = predict_peak(df)
     forecast.to_csv(FORECAST_RESULTS_CSV, index=False)
     print(forecast.tail())
+    import sys
+    sys.exit(0)

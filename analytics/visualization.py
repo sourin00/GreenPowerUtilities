@@ -121,3 +121,5 @@ if __name__ == "__main__":
         plot_carbon(carbon_report)
     else:
         print(f"{CARBON_REPORT_CSV} not found. Skipping carbon emissions plot.")
+    import sys
+    sys.exit(0)

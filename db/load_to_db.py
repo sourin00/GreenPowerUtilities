@@ -42,3 +42,5 @@ consumption.to_sql("consumption_data", engine, if_exists="append", index=False)
 weather.to_sql("weather_data", engine, if_exists="append", index=False)
 
 print("Data loaded successfully into TimescaleDB.")
+import sys
+sys.exit(0)

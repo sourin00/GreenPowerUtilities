@@ -11,3 +11,5 @@ if __name__ == "__main__":
     merged = merge_data(iea, weather)
     merged.to_csv(MERGED_DATA_CSV, index=False)
     print(f"Merged data saved to {MERGED_DATA_CSV}")
+    import sys
+    sys.exit(0)
