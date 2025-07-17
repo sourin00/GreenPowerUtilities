@@ -1,7 +1,7 @@
 # GreenPower Project
 
 ## Overview
-GreenPower is a comprehensive analytics platform for energy consumption and carbon emissions forecasting. It ingests, cleans, analyzes, and visualizes energy and weather data, providing actionable insights and reports for France (2023-2025). The system is modular, scalable, and designed for extensibility.
+GreenPower is a comprehensive analytics platform for energy consumption and carbon emissions forecasting. It ingests, cleans, analyzes, and visualizes energy and weather data, providing actionable insights and reports for France (2010-2025). The system is modular, scalable, and designed for extensibility.
 
 ## Directory Structure
 - `analytics/`: Data analytics modules (forecasting, reporting, visualization, utilities)
